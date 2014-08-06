@@ -37,7 +37,7 @@ else
 fi
 
 # Download and extract Kanboard
-if [[ ! -d ${OPENSHIFT_DATA_DIR}/kanboard-${version} ]]
+if [[ ! -d ${OPENSHIFT_DATA_DIR}kanboard-${version} ]]
 then
     cd ${OPENSHIFT_DATA_DIR}
 
@@ -48,5 +48,13 @@ then
     cd - > /dev/null
 fi
 
-cp -r ${OPENSHIFT_DATA_DIR}/kanboard-${version}/* ${OPENSHIFT_REPO_DIR}/php/
-cp -r ${OPENSHIFT_REPO_DIR}/.openshift/action_hooks/config.php ${OPENSHIFT_REPO_DIR}/php/
+# Create the php folder if it does not exists
+if [[ ! -d ${OPENSHIFT_REPO_DIR}php ]]
+then
+    rm -f mkdir ${OPENSHIFT_REPO_DIR}php
+    mkdir ${OPENSHIFT_REPO_DIR}php
+fi
+
+# Copy stuff in the php folder
+cp -r ${OPENSHIFT_DATA_DIR}/kanboard-${version}/* ${OPENSHIFT_REPO_DIR}php/
+cp -r ${OPENSHIFT_REPO_DIR}/.openshift/action_hooks/config.php ${OPENSHIFT_REPO_DIR}php/
