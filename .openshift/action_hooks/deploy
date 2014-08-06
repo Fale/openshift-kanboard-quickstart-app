@@ -1,0 +1,52 @@
+#!/bin/bash
+# This deploy hook gets executed after dependencies are resolved and the
+# build hook has been run but before the application has been started back
+# up again.  This script gets executed directly, so it could be python, php,
+# ruby, etc.
+
+set -e
+
+version="1.06"
+
+if [ -z $OPENSHIFT_MYSQL_DB_HOST ]
+then
+    echo 1>&2
+    echo "Could not find mysql database.  Please run:" 1>&2
+    echo "rhc cartridge add -a $OPENSHIFT_APP_NAME -c mysql-5.1" 1>&2
+    echo "then make a sample commit (add whitespace somewhere) and re-push" 1>&2
+    echo 1>&2
+    exit 5
+fi
+
+# Confirm database exists, if not create it
+if ! /usr/bin/mysql -u "$OPENSHIFT_MYSQL_DB_USERNAME" --password="$OPENSHIFT_MYSQL_DB_PASSWORD" -h "$OPENSHIFT_MYSQL_DB_HOST" -P "$OPENSHIFT_MYSQL_DB_PORT" -e "show tables;" $OPENSHIFT_APP_NAME > /dev/null 2>&1
+then
+    echo
+    echo "Database not found! Creating it"
+    echo
+    /usr/bin/mysqladmin -u "$OPENSHIFT_MYSQL_DB_USERNAME" --password="$OPENSHIFT_MYSQL_DB_PASSWORD" -h "$OPENSHIFT_MYSQL_DB_HOST" -P "$OPENSHIFT_MYSQL_DB_PORT" create "$OPENSHIFT_APP_NAME" 
+    echo
+    echo "done."
+    echo "=================================================="
+    echo "  Kanboard login: admin"
+    echo "  Kanboard-Admin password: admin"
+    echo "  Don't forget to change your Kanboard admin password!"
+    echo "=================================================="
+else
+    echo "Database found, skipping build"
+fi
+
+# Download and extract Kanboard
+if [[ ! -d ${OPENSHIFT_DATA_DIR}/kanboard-${version} ]]
+then
+    cd ${OPENSHIFT_DATA_DIR}
+
+    wget http://kanboard.net/kanboard-${version}.zip
+    unzip kanboard-${version}.zip
+    mv kanboard kanboard-${version}
+
+    cd - > /dev/null
+fi
+
+cp -r ${OPENSHIFT_DATA_DIR}/kanboard-${version}/* ${OPENSHIFT_REPO_DIR}/php/
+cp -r ${OPENSHIFT_REPO_DIR}/.openshift/action_hooks/config.php ${OPENSHIFT_REPO_DIR}/php/
