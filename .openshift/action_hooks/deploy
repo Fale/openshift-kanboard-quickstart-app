@@ -6,7 +6,7 @@
 
 set -e
 
-version="1.0.9"
+version="1.0.19"
 
 if [ -z $OPENSHIFT_MYSQL_DB_HOST ]
 then
