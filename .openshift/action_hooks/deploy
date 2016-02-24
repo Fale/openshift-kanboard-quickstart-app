@@ -6,8 +6,6 @@
 
 set -e
 
-version="1.0.19"
-
 if [ -z $OPENSHIFT_MYSQL_DB_HOST ]
 then
     echo 1>&2
@@ -37,13 +35,15 @@ else
 fi
 
 # Download and extract Kanboard
-if [[ ! -d ${OPENSHIFT_DATA_DIR}kanboard-${version} ]]
+# If OPENSHIFT_KANBOARD_VERSION is unset we get latest, but if we have latest we get nothing
+# This ensures that new installs are up to date but updates must be done with explicit versioning
+if [[ ! -d ${OPENSHIFT_DATA_DIR}kanboard-${OPENSHIFT_KANBOARD_VERSION:=latest} ]]
 then
     cd ${OPENSHIFT_DATA_DIR}
 
-    wget http://kanboard.net/kanboard-${version}.zip
-    unzip kanboard-${version}.zip
-    mv kanboard kanboard-${version}
+    wget http://kanboard.net/kanboard-${OPENSHIFT_KANBOARD_VERSION}.zip
+    unzip kanboard-${OPENSHIFT_KANBOARD_VERSION}.zip
+    mv kanboard kanboard-${OPENSHIFT_KANBOARD_VERSION}
 
     cd - > /dev/null
 fi
@@ -56,5 +56,5 @@ then
 fi
 
 # Copy stuff in the php folder
-cp -r ${OPENSHIFT_DATA_DIR}/kanboard-${version}/* ${OPENSHIFT_REPO_DIR}php/
+cp -r ${OPENSHIFT_DATA_DIR}/kanboard-${OPENSHIFT_KANBOARD_VERSION}/* ${OPENSHIFT_REPO_DIR}php/
 cp -r ${OPENSHIFT_REPO_DIR}/.openshift/action_hooks/config.php ${OPENSHIFT_REPO_DIR}php/
