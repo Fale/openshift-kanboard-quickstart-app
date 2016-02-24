@@ -10,6 +10,6 @@ On subsequent runs it will not be modified unless the version that you wish to u
 to is explicitly specified in the OpenShift environment variable OPENSHIFT_KANBOARD_VERSION.
 To set this variable, use the following command:
 
- rhc env set OPENSHIFT_KANBOARD_VERSION=<VERSION> -a <APP NAME>
+    rhc env set OPENSHIFT_KANBOARD_VERSION=<VERSION> -a <APP NAME>
 
 Then commit and push.
